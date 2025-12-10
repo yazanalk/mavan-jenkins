@@ -14,7 +14,7 @@ pipeline {
 
         stage('Build Maven') {
             steps {
-                bat 'mvn clean install'
+                bat 'mvn clean package'
             }
         }
 
@@ -35,6 +35,17 @@ pipeline {
                         bat 'docker push yazankhdoc1/maven-jenkins'
                     }
                     
+                }
+            }
+        }
+        
+         stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([file(credentialsId: '1d9fb52d-45cd-4584-8997-cb2d9c619921', variable: 'kubeconfigvar')]) {
+                    bat """
+                    echo Applying Kubernetes deployment...
+                    kubectl --kubeconfig=%kubeconfigvar% apply -f deploymentandservice.yaml
+                    """
                 }
             }
         }
